@@ -17,6 +17,18 @@ def search_closest(my_position, cell_positions)
   answer
 end
 
+def random(my_position, cell_positions)
+  # next point is random
+  cell = cell_positions.sample
+  { 'distance' => compute_distance(my_position, cell['position']), 'key' => cell['key'] }
+end
+
+def get_next_move(my_position, cell_positions)
+  # to try different algorithms
+  # search_closest(my_position, cell_positions)
+  random(my_position, cell_positions)
+end
+
 def compute_distance(position_1, position_2)
   Math.sqrt((Integer(position_2.x) - Integer(position_1.x))**2 + (Integer(position_2.y) - Integer(position_1.y))**2)
 end
@@ -53,7 +65,7 @@ def main
   current_position = Position.new
   parsed_data = parse_file(PATH)
   while total_distance < MAX_TIME
-    next_move = search_closest(current_position, parsed_data)
+    next_move = get_next_move(current_position, parsed_data)
     total_distance += next_move['distance']
     moves << next_move['key']
     # need to remove the move from the parsed_data
