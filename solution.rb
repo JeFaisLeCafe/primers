@@ -9,24 +9,50 @@ def search_closest(my_position, cell_positions)
   answer = {}
   cell_positions.each do |item|
     distance = compute_distance(my_position, item['position'])
-    if !answer['key'] || distance < answer['distance']
-      answer['distance'] = distance
-      answer['key'] = item['key']
-    end
+    next unless !answer['key'] || distance < answer['distance']
+
+    answer['distance'] = distance
+    answer['key'] = item['key']
+    answer['position'] = item['position']
   end
+  answer
+end
+
+def search_farthest(my_position, cell_positions)
+  answer = {}
+  cell_positions.each do |item|
+    distance = compute_distance(my_position, item['position'])
+    next unless !answer['key'] || distance > answer['distance']
+
+    answer['distance'] = distance
+    answer['key'] = item['key']
+    answer['position'] = item['position']
+  end
+  answer
+end
+
+def yuliia_method(my_position, cell_positions)
+  # first, go to the farthest
+  # then to the closest ones
+  answer = if cell_positions.length == 20_000
+             search_farthest(my_position, cell_positions)
+           else
+             search_closest(my_position, cell_positions)
+           end
   answer
 end
 
 def random(my_position, cell_positions)
   # next point is random
   cell = cell_positions.sample
-  { 'distance' => compute_distance(my_position, cell['position']), 'key' => cell['key'] }
+  { 'distance' => compute_distance(my_position, cell['position']), 'key' => cell['key'], 'position': cell['position'] }
 end
 
 def get_next_move(my_position, cell_positions)
   # to try different algorithms
-  # search_closest(my_position, cell_positions)
-  random(my_position, cell_positions)
+  search_closest(my_position, cell_positions)
+  # random(my_position, cell_positions)
+  # yuliia_method(my_position, cell_positions)
 end
 
 def compute_distance(position_1, position_2)
@@ -48,7 +74,6 @@ def parse_file(path)
     txt_arr = line.split(',').map(&:strip)
     data << { 'key' => txt_arr[0], 'position' => Position.new(txt_arr[1], txt_arr[2]) }
   end
-  puts data.length
   data
 end
 
@@ -66,16 +91,13 @@ def main
   parsed_data = parse_file(PATH)
   while total_distance < MAX_TIME
     next_move = get_next_move(current_position, parsed_data)
+    current_position = next_move['position']
     total_distance += next_move['distance']
     moves << next_move['key']
     # need to remove the move from the parsed_data
     parsed_data.reject! { |item| item['key'] == next_move['key'] }
-    puts 'total', total_distance, 'added', next_move
   end
-  puts 'last', moves.last
   moves.pop
-  puts 'last', moves.last
-  puts total_distance
 
   # needs to write the output in a file
   File.open('PE_answer.txt', 'w+') do |f|
