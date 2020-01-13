@@ -31,6 +31,38 @@ def search_farthest(my_position, cell_positions)
   answer
 end
 
+def gravity_method
+  # The goal here is to calculate the gravity of each cell
+  # gravity is: F = G * (m1 * m2) / d²
+  # here it could be: Ftot = SUM(2/D²) between this cell and each cell
+  # we have then a vectorial field
+  # in the first approach, we could simply go toward the field with the most gravity, and then take all the closest
+  # so: 1-compute the gravity field  /  2 - go toward the highest gravity cell  /  3 - take all the closest
+  # Next step would be to re-compute dynamically the vectorial field, and have an algorithm to choose between staying here to eat the closest or go there
+  # Maybe eating the closest is not the best strategy neither: calculation of chains of N-closest (apparently limited to 4-5 by computer limitations)
+end
+
+def compute_gravity_field(cell_positions)
+  # adds to each cell a gravity number, which is the sum of all gravity forces applied to this cell
+  gravity_field = cell_positions.map do |cell|
+    compute_cell_gravity(cell, cell_positions)
+  end
+  File.open('gravity_field.txt', 'w+') do |f|
+    f.puts(gravity_field)
+  end
+end
+
+def compute_cell_gravity(cell, cell_positions)
+  # compute cell gravity and returns the cell object with gravity
+  cell['gravity'] = 0
+  cell_positions.each do |item|
+    if cell['key'] != item['key']
+      cell['gravity'] += (2 / compute_distance(cell['position'], item['position'])**2)
+    end
+  end
+  cell
+end
+
 def yuliia_method(my_position, cell_positions)
   # first, go to the farthest
   # then to the closest ones
@@ -108,4 +140,4 @@ end
 MAX_TIME = 100_000
 PATH = './input_2.txt'
 
-main
+compute_gravity_field
