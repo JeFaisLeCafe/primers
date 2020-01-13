@@ -140,4 +140,4 @@ end
 MAX_TIME = 100_000
 PATH = './input_2.txt'
 
-compute_gravity_field
+main
