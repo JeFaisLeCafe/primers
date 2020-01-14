@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 def search_closest(my_position, cell_positions)
   # Goal is to find the closet cell and go toward them
   # First, we need to compute distance toward every other cell
@@ -31,7 +33,7 @@ def search_farthest(my_position, cell_positions)
   answer
 end
 
-def gravity_method
+def gravity_method(my_position, cell_positions)
   # The goal here is to calculate the gravity of each cell
   # gravity is: F = G * (m1 * m2) / d²
   # here it could be: Ftot = SUM(2/D²) between this cell and each cell
@@ -40,6 +42,28 @@ def gravity_method
   # so: 1-compute the gravity field  /  2 - go toward the highest gravity cell  /  3 - take all the closest
   # Next step would be to re-compute dynamically the vectorial field, and have an algorithm to choose between staying here to eat the closest or go there
   # Maybe eating the closest is not the best strategy neither: calculation of chains of N-closest (apparently limited to 4-5 by computer limitations)
+  answer = {}
+  if cell_positions.length == 20_000
+    gravity_field = parse_gravity_file(GRAVITY_PATH)
+    puts gravity_field.last, gravity_field.last.is_a?(String)
+    key = gravity_field.max_by { |k| k['gravity'] }['key']
+    start_point = find_cell_by_key(key, cell_positions)
+    puts 'key', key, 'start_point', start_point
+    answer = { 'key' => key, 'position' => start_point['position'], 'distance' => compute_distance(my_position, start_point['position']) }
+  else
+    answer = search_closest(my_position, cell_positions)
+  end
+  answer
+end
+
+def find_cell_by_key(key, cells)
+  # returns the whole cell corresponding to the key
+  cells.find { |f| f['key'] == key }
+end
+
+def parse_gravity_file(path)
+  # parses the gravity file and returns an array of objects
+  data_hash = JSON.parse(File.read(path))
 end
 
 def compute_gravity_field(cell_positions)
@@ -47,8 +71,8 @@ def compute_gravity_field(cell_positions)
   gravity_field = cell_positions.map do |cell|
     compute_cell_gravity(cell, cell_positions)
   end
-  File.open('gravity_field.txt', 'w+') do |f|
-    f.puts(gravity_field)
+  File.open('gravity_field.json', 'w+') do |f|
+    f.write(gravity_field.to_json)
   end
 end
 
@@ -82,9 +106,10 @@ end
 
 def get_next_move(my_position, cell_positions)
   # to try different algorithms
-  search_closest(my_position, cell_positions)
+  # search_closest(my_position, cell_positions)
   # random(my_position, cell_positions)
   # yuliia_method(my_position, cell_positions)
+  gravity_method(my_position, cell_positions)
 end
 
 def compute_distance(position_1, position_2)
@@ -139,5 +164,6 @@ end
 
 MAX_TIME = 100_000
 PATH = './input_2.txt'
+GRAVITY_PATH = './gravity_field.json'
 
 main
