@@ -33,6 +33,27 @@ def search_farthest(my_position, cell_positions)
   answer
 end
 
+def n_closest_method(my_position, cell_positions)
+  # the goal here is to get the next best cell, which is the one with the closest n-next cells
+  # returns the next cell to eat, which is the one with N cell closer
+  N = 2
+  # constructing an array of [{positions: [1, 442, 111], total_distance: 4442}]
+  arr = cell_positions.map do |cell|
+    res = {}
+    N.times do |i|
+      ans = search_closest(cell, cell_positions)
+    end
+
+  end
+
+end
+
+def go_to_cell_while_eating(start_cell, end_cell, cell_positions)
+  # here we try an algorithm to go from A to B while eating the closest, in a direction
+  # so next cell needs to be weighted by distance, not only to current_position, but to end_cell too
+
+end
+
 def gravity_method(my_position, cell_positions)
   # The goal here is to calculate the gravity of each cell
   # gravity is: F = G * (m1 * m2) / d²
